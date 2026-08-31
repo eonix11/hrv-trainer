@@ -6,6 +6,8 @@ HRVEngine::HRVEngine()
     rmssd = 0;
     averageHR = 0;
     sdnn = 0;
+    pNN50 = 0;
+
 }
 
 void HRVEngine::calculate(const RRBuffer& buffer)
@@ -36,29 +38,35 @@ void HRVEngine::calculate(const RRBuffer& buffer)
     }
     sdnn = sqrt(variance / (n-1));
 
+    int countOver50 = 0;
     // RMSSD
-    for (int i = 1; i < n; i++)
-    {
-        float difference =
-            buffer.get(i) - buffer.get(i - 1);
+    for (int i = 1; i < n; i++) {
+        float difference = buffer.get(i) - buffer.get(i - 1);
 
         sumSq += difference * difference;
-    }
 
+        if(abs(difference) > 50) {
+            countOver50++;
+        }
+    }
+    
     rmssd = sqrt(sumSq / (n - 1));
+
+    pNN50 = (countOver50 * 100.0) / (n-1);
 }
 
-float HRVEngine::getRMSSD() const
-{
+float HRVEngine::getRMSSD() const {
     return rmssd;
 }
 
-float HRVEngine::getAverageHR() const
-{
+float HRVEngine::getAverageHR() const {
     return averageHR;
 }
 
-float HRVEngine::getSDNN() const
-{
+float HRVEngine::getSDNN() const {
     return sdnn;
+}
+
+float HRVEngine::getPNN50() const {
+    return pNN50;
 }

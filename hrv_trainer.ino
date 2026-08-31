@@ -124,6 +124,10 @@ void onBeatDetected()
     Serial.print(hrv.getSDNN(), 1);
     Serial.println(" ms");
 
+    Serial.print("pNN50: ");
+    Serial.print(hrv.getPNN50(), 1);
+    Serial.println(" %");
+
     Serial.println("=================================");
     Serial.println();
 

@@ -9,6 +9,7 @@ private:
     float rmssd;
     float averageHR;
     float sdnn;
+    float pNN50;
 
 public:
     HRVEngine();
@@ -18,6 +19,7 @@ public:
     float getRMSSD() const;
     float getAverageHR() const;
     float getSDNN() const;
+    float getPNN50() const;
 };
 
 #endif
