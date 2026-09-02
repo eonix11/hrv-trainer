@@ -4,12 +4,14 @@
 #include "RRBuffer.h"
 #include "TimeSeries.h"
 #include "HRVEngine.h"
+#include "CoherenceEngine.h"
 
 PulseOximeter pox;
 
 RRBuffer rrBuffer;
 TimeSeries timeSeries;
 HRVEngine hrv;
+CoherenceEngine coherence;
 
 #define MIN_RR 700
 #define MAX_RR 1200
@@ -64,12 +66,10 @@ void onBeatDetected()
     }
   }
 
-
   // Store data
   rrBuffer.add(rr);
 
   timeSeries.add(now, rr);
-
 
   // Print
   Serial.print("RR: ");
@@ -135,6 +135,9 @@ void onBeatDetected()
     rrBuffer.clear();
   }
 
+  if (timeSeries.size() >= 20) {
+    coherence.calculate(timeSeries);
+  }
 
   lastBeat = now;
 }
