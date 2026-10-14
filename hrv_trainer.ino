@@ -18,6 +18,8 @@ CoherenceEngine coherence;
 #define MAX_CHANGE_PERCENT 15
 
 unsigned long lastBeat = 0;
+unsigned long totalBeats = 0;
+bool beatReady = false;
 
 
 // ========================================
@@ -83,13 +85,26 @@ void onBeatDetected()
 
   Serial.println(" ms");
 
+  totalBeats++;
+  beatReady = true;   // heavy work runs in loop(), not here
+
+  lastBeat = now;
+}
+
+
+// ========================================
+// PROCESSING (called from loop)
+// ========================================
+
+void processBeat()
+{
+  BeatEvent latest =
+    timeSeries.get(timeSeries.size() - 1);
+
 
   // Show TimeSeries every 10 beats
-  if (timeSeries.size() % 10 == 0)
+  if (totalBeats % 10 == 0)
   {
-    BeatEvent latest =
-      timeSeries.get(timeSeries.size() - 1);
-
     Serial.print("TimeSeries events: ");
     Serial.println(timeSeries.size());
 
@@ -135,11 +150,29 @@ void onBeatDetected()
     rrBuffer.clear();
   }
 
-  if (timeSeries.size() >= 20) {
-    coherence.calculate(timeSeries);
+
+  // Coherence on the latest 64 s
+  if (coherence.calculate(timeSeries))
+  {
+    Serial.print("Dominant frequency: ");
+    Serial.print(coherence.getDominantFrequency(), 3);
+    Serial.print(" Hz | Coherence: ");
+    Serial.println(coherence.getCoherenceScore(), 2);
   }
 
-  lastBeat = now;
+
+  // Machine-readable line for the dashboard
+  Serial.printf(
+    "JSON:{\"t\":%lu,\"rr\":%d,\"hr\":%.1f,\"rmssd\":%.1f,\"sdnn\":%.1f,"
+    "\"pnn50\":%.1f,\"freq\":%.3f,\"coh\":%.2f}\n",
+    latest.timestamp,
+    latest.rr,
+    latest.hr,
+    hrv.getRMSSD(),
+    hrv.getSDNN(),
+    hrv.getPNN50(),
+    coherence.getDominantFrequency(),
+    coherence.getCoherenceScore());
 }
 
 
@@ -184,4 +217,10 @@ void setup()
 void loop()
 {
   pox.update();
+
+  if (beatReady)
+  {
+    beatReady = false;
+    processBeat();
+  }
 }

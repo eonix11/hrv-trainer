@@ -2,3 +2,10 @@
 .vscode/
 build/
 *.tmp
+dashboard/node_modules/
+dashboard/dist/
+
+# Personal notes and Claude Code config
+docs/
+CLAUDE.md
+.claude/

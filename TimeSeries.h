@@ -14,6 +14,7 @@ private:
     static const int MAX_EVENTS = 120;
 
     BeatEvent events[MAX_EVENTS];
+    int head;   // index of the oldest event
     int count;
 
 public:
